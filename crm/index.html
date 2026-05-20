@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InkStudio CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0c0c0e;--surface:#141416;--card:#1a1a1e;--card2:#1f1f24;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
+  --orange:#ff6800;--orange-dim:rgba(255,104,0,.12);--orange-mid:rgba(255,104,0,.25);
+  --text:#f0ede8;--muted:#888;--muted2:#555;
+  --green:#2dd36f;--green-dim:rgba(45,211,111,.12);
+  --red:#e84545;--red-dim:rgba(232,69,69,.12);
+  --blue:#4d9fff;--blue-dim:rgba(77,159,255,.12);
+  --yellow:#f5c542;--yellow-dim:rgba(245,197,66,.12);
+  --r:10px;--r2:16px;--r3:24px;
+  --font:'Inter',sans-serif;
+}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-weight:400;display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow:hidden}
+.sidebar-logo{padding:1.4rem 1.4rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.6rem}
+.sidebar-logo span{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--text)}
+.logo-dot{width:8px;height:8px;background:var(--orange);border-radius:50%}
+.sidebar-nav{padding:.8rem .6rem;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.nav-section{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2);padding:.8rem .8rem .4rem;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.65rem .8rem;border-radius:var(--r);cursor:pointer;transition:all .2s;color:var(--muted);font-size:.82rem;font-weight:400;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+.nav-item.active{background:var(--orange-dim);color:var(--orange);font-weight:500}
+.nav-item svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.8;fill:none;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--orange);color:#fff;font-size:.6rem;padding:.15rem .45rem;border-radius:99px;font-weight:600}
+.sidebar-bottom{padding:.8rem .6rem;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:var(--r)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff9500);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;flex-shrink:0}
+.user-name{font-size:.78rem;font-weight:500}
+.user-role{font-size:.65rem;color:var(--muted);margin-top:1px}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:.85rem 1.8rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);flex-shrink:0}
+.topbar-title{font-size:.95rem;font-weight:600}
+.topbar-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:.7rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--card);color:var(--text);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.btn:hover{border-color:rgba(255,255,255,.2);background:var(--card2)}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn-primary:hover{background:#e55f00;border-color:#e55f00}
+.btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none}
+.content{flex:1;overflow-y:auto;padding:1.6rem 1.8rem}
+
+/* VIEWS — hidden by default */
+.view{display:none}
+.view.active{display:block}
+
+/* DASHBOARD */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.6rem}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem 1.4rem}
+.kpi-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem}
+.kpi-value{font-size:1.7rem;font-weight:600;line-height:1;margin-bottom:.4rem}
+.kpi-delta{font-size:.7rem;display:flex;align-items:center;gap:.3rem}
+.delta-up{color:var(--green)}.delta-down{color:var(--red)}
+.dash-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:1rem}
+.dash-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem 1.4rem}
+.dash-card-title{font-size:.75rem;font-weight:600;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.dash-card-title a{font-size:.68rem;color:var(--orange);text-decoration:none;cursor:pointer;font-weight:400}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:.5rem}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;background:var(--orange-dim);border-radius:4px 4px 0 0;transition:height .4s ease;position:relative;cursor:pointer}
+.bar:hover{background:var(--orange-mid)}
+.bar-label{font-size:.58rem;color:var(--muted);white-space:nowrap}
+.bar-val{font-size:.6rem;color:var(--orange);font-weight:600}
+.appt-list{display:flex;flex-direction:column;gap:.5rem}
+.appt-row{display:flex;align-items:center;gap:.8rem;padding:.6rem .8rem;background:var(--card2);border-radius:var(--r);border:1px solid var(--border)}
+.appt-time{font-size:.7rem;color:var(--muted);width:80px;flex-shrink:0}
+.appt-name{font-size:.8rem;font-weight:500;flex:1}
+.appt-artist{font-size:.68rem;color:var(--muted)}
+.appt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tag{font-size:.62rem;padding:.2rem .55rem;border-radius:99px;font-weight:500}
+.tag-green{background:var(--green-dim);color:var(--green)}
+.tag-orange{background:var(--orange-dim);color:var(--orange)}
+.tag-red{background:var(--red-dim);color:var(--red)}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}
+.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.tag-gray{background:rgba(255,255,255,.06);color:var(--muted)}
+.artist-perf{display:flex;flex-direction:column;gap:.65rem}
+.perf-row{display:flex;align-items:center;gap:.8rem}
+.perf-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;color:#fff;flex-shrink:0}
+.perf-name{font-size:.78rem;font-weight:500;flex:1}
+.perf-bar-wrap{width:100px;height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.perf-bar{height:100%;background:var(--orange);border-radius:99px}
+.perf-val{font-size:.72rem;color:var(--muted);width:50px;text-align:right}
+
+/* CLIENTS */
+.search-bar{display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem}
+.search-input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.55rem .9rem;border-radius:var(--r);font-size:.82rem;font-family:var(--font);outline:none;transition:border-color .2s}
+.search-input:focus{border-color:rgba(255,104,0,.4)}
+.search-input::placeholder{color:var(--muted2)}
+.filter-btn{padding:.5rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-size:.75rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.filter-btn:hover,.filter-btn.active{border-color:var(--orange);color:var(--orange);background:var(--orange-dim)}
+.clients-table{width:100%;border-collapse:collapse}
+.clients-table th{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:.7rem 1rem;text-align:left;border-bottom:1px solid var(--border);font-weight:500}
+.clients-table td{padding:.75rem 1rem;border-bottom:1px solid rgba(255,255,255,.04);font-size:.8rem;vertical-align:middle}
+.clients-table tr:hover td{background:rgba(255,255,255,.02)}
+.client-row{cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:600;color:#fff;flex-shrink:0}
+.client-name-cell{display:flex;align-items:center;gap:.7rem}
+.client-name{font-weight:500;font-size:.82rem}
+.client-email{font-size:.68rem;color:var(--muted);margin-top:1px}
+.stars{color:var(--orange);font-size:.7rem;letter-spacing:1px}
+
+/* CLIENT DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);width:780px;max-width:95vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;transform:scale(.96);transition:transform .25s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{padding:1.4rem 1.6rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.modal-av{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;color:#fff;flex-shrink:0}
+.modal-name{font-size:1rem;font-weight:600}
+.modal-meta{font-size:.72rem;color:var(--muted);margin-top:2px}
+.modal-close{margin-left:auto;width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);background:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .2s}
+.modal-close:hover{border-color:var(--red);color:var(--red)}
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 1.6rem}
+.modal-tab{padding:.75rem 1rem;font-size:.75rem;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s;font-weight:500}
+.modal-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.modal-body{padding:1.4rem 1.6rem;overflow-y:auto;flex:1}
+.modal-tab-content{display:none}
+.modal-tab-content.active{display:block}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
+.info-field{background:var(--card);border-radius:var(--r);padding:.8rem 1rem}
+.info-field-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+.info-field-val{font-size:.82rem;font-weight:500}
+.design-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:.5rem}
+.design-thumb{aspect-ratio:1;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);cursor:pointer;position:relative;transition:transform .2s}
+.design-thumb:hover{transform:scale(1.03);border-color:var(--orange-mid)}
+.design-thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.design-add{border:1px dashed var(--border2);background:none;cursor:pointer;aspect-ratio:1;border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;color:var(--muted);font-size:.72rem;transition:all .2s}
+.design-add:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-dim)}
+.design-add svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.5;fill:none}
+.notes-area{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:.8rem 1rem;border-radius:var(--r);font-size:.82rem;font-family:var(--font);resize:vertical;min-height:100px;outline:none}
+.notes-area:focus{border-color:rgba(255,104,0,.4)}
+.history-list{display:flex;flex-direction:column;gap:.6rem}
+.history-item{display:flex;gap:.8rem;align-items:flex-start;padding:.7rem .9rem;background:var(--card);border-radius:var(--r);border:1px solid var(--border)}
+.history-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.history-desc{font-size:.8rem;flex:1}
+.history-date{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.history-amount{font-size:.8rem;font-weight:600;color:var(--green)}
+.section-title-sm{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.7rem;margin-top:1.2rem}
+.section-title-sm:first-child{margin-top:0}
+
+/* CALENDAR */
+.cal-controls{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem}
+.cal-nav{display:flex;gap:.4rem}
+.cal-nav button{width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border2);background:var(--card);color:var(--text);cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.cal-nav button:hover{border-color:var(--orange);color:var(--orange)}
+.cal-date-label{font-size:.88rem;font-weight:600;min-width:180px}
+.view-tabs{display:flex;gap:.3rem;margin-left:auto}
+.view-tab{padding:.4rem .9rem;border-radius:var(--r);border:1px solid var(--border2);background:var(--card);color:var(--muted);font-size:.72rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.view-tab.active{background:var(--orange-dim);border-color:var(--orange);color:var(--orange)}
+/* Week view */
+.week-grid{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.week-header{display:grid;border-bottom:1px solid var(--border)}
+.week-time-col{width:60px;flex-shrink:0}
+.week-artist-header{padding:.75rem .8rem;font-size:.72rem;font-weight:600;border-left:1px solid var(--border);display:flex;align-items:center;gap:.5rem}
+.week-artist-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:600;color:#fff}
+.week-body{display:flex}
+.week-times{width:60px;flex-shrink:0;padding-top:2px}
+.week-time-slot{height:50px;display:flex;align-items:flex-start;justify-content:center;padding-top:3px;font-size:.6rem;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
+.week-cols{flex:1;display:grid;position:relative}
+.week-col{border-left:1px solid var(--border);position:relative}
+.week-slot{height:50px;border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;cursor:pointer}
+.week-slot:hover{background:rgba(255,104,0,.04)}
+.week-event{position:absolute;left:3px;right:3px;background:var(--orange-dim);border:1px solid var(--orange-mid);border-left:3px solid var(--orange);border-radius:6px;padding:.25rem .5rem;cursor:pointer;z-index:2;overflow:hidden;transition:all .2s}
+.week-event:hover{background:var(--orange-mid);z-index:3}
+.week-event-name{font-size:.68rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.week-event-time{font-size:.6rem;color:var(--muted)}
+.week-event.blue{background:var(--blue-dim);border-color:rgba(77,159,255,.3);border-left-color:var(--blue)}
+.week-event.green{background:var(--green-dim);border-color:rgba(45,211,111,.3);border-left-color:var(--green)}
+.week-event.yellow{background:var(--yellow-dim);border-color:rgba(245,197,66,.3);border-left-color:var(--yellow)}
+/* Month view */
+.month-grid{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.month-header-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border)}
+.month-day-name{padding:.6rem;text-align:center;font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+.month-body{display:grid;grid-template-columns:repeat(7,1fr)}
+.month-cell{min-height:80px;padding:.5rem .6rem;border-right:1px solid rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .15s}
+.month-cell:hover{background:rgba(255,255,255,.02)}
+.month-cell.today .month-day-num{background:var(--orange);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.month-cell.other-month{opacity:.3}
+.month-day-num{font-size:.72rem;font-weight:500;margin-bottom:.4rem;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.month-event-dot{font-size:.6rem;background:var(--orange-dim);color:var(--orange);padding:.1rem .4rem;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.month-event-dot.blue{background:var(--blue-dim);color:var(--blue)}
+.month-event-dot.green{background:var(--green-dim);color:var(--green)}
+/* Day view */
+.day-grid{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;display:flex}
+.day-times{width:60px;flex-shrink:0}
+.day-time-slot{height:60px;display:flex;align-items:flex-start;justify-content:center;padding-top:3px;font-size:.6rem;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.03)}
+.day-content{flex:1;border-left:1px solid var(--border);position:relative}
+.day-slot{height:60px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer;transition:background .15s}
+.day-slot:hover{background:rgba(255,104,0,.04)}
+.day-event{position:absolute;left:8px;right:8px;background:var(--orange-dim);border:1px solid var(--orange-mid);border-left:3px solid var(--orange);border-radius:8px;padding:.4rem .7rem;cursor:pointer;z-index:2;transition:all .2s}
+.day-event:hover{background:var(--orange-mid)}
+.day-event-name{font-size:.78rem;font-weight:600}
+.day-event-detail{font-size:.65rem;color:var(--muted);margin-top:2px}
+.day-event.blue{background:var(--blue-dim);border-color:rgba(77,159,255,.3);border-left-color:var(--blue)}
+
+/* FINANCES */
+.fin-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.4rem}
+.fin-row{display:grid;grid-template-columns:1.6fr 1fr;gap:1rem;margin-bottom:1rem}
+.fin-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.2rem 1.4rem}
+.fin-card-title{font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center}
+.invoices-table{width:100%;border-collapse:collapse}
+.invoices-table th{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);padding:.55rem .8rem;text-align:left;font-weight:500}
+.invoices-table td{padding:.65rem .8rem;font-size:.78rem;border-top:1px solid rgba(255,255,255,.04)}
+.invoices-table tr:hover td{background:rgba(255,255,255,.02)}
+.pie-wrap{display:flex;align-items:center;gap:1.4rem}
+.pie-svg{flex-shrink:0}
+.pie-legend{display:flex;flex-direction:column;gap:.5rem}
+.pie-legend-item{display:flex;align-items:center;gap:.5rem;font-size:.72rem}
+.pie-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.revenue-bars{display:flex;align-items:flex-end;gap:5px;height:100px}
+.r-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.r-bar{width:100%;border-radius:4px 4px 0 0;background:var(--orange);opacity:.7;transition:opacity .2s,height .6s ease;cursor:pointer}
+.r-bar:hover{opacity:1}
+.r-bar.prev{background:var(--muted2);opacity:1}
+.r-label{font-size:.55rem;color:var(--muted);white-space:nowrap}
+.expense-row{display:flex;align-items:center;gap:.8rem;padding:.5rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.expense-row:last-child{border-bottom:none}
+.expense-cat{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.expense-name{flex:1;font-size:.78rem}
+.expense-amount{font-size:.78rem;font-weight:500;color:var(--red)}
+.expense-bar-wrap{width:80px;height:4px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.expense-bar-inner{height:100%;border-radius:99px}
+
+/* ADD APPOINTMENT MODAL */
+.appt-modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r3);width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;padding:1.6rem;transform:scale(.96);transition:transform .25s}
+.modal-overlay.open .appt-modal{transform:scale(1)}
+.modal-title{font-size:.95rem;font-weight:600;margin-bottom:1.4rem;display:flex;justify-content:space-between;align-items:center}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.8rem}
+.form-group label{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500}
+.form-input{background:var(--card);border:1px solid var(--border2);color:var(--text);padding:.6rem .85rem;border-radius:var(--r);font-size:.8rem;font-family:var(--font);outline:none;transition:border-color .2s;width:100%}
+.form-input:focus{border-color:rgba(255,104,0,.5)}
+.form-input option{background:var(--card)}
+.form-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2)}
+
+/* EMPTY STATE */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem;color:var(--muted);gap:.8rem;text-align:center}
+.empty-state svg{width:40px;height:40px;stroke:var(--muted2);stroke-width:1.2;fill:none}
+.empty-state p{font-size:.82rem}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-dot"></div>
+    <span>InkStudio</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Übersicht</div>
+    <button class="nav-item active" onclick="showView('dashboard',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+    <div class="nav-section">Studio</div>
+    <button class="nav-item" onclick="showView('clients',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Kunden
+      <span class="nav-badge">48</span>
+    </button>
+    <button class="nav-item" onclick="showView('calendar',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Kalender
+    </button>
+    <div class="nav-section">Verwaltung</div>
+    <button class="nav-item" onclick="showView('finances',this)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Finanzen
+      <span class="nav-badge" style="background:var(--red)">3</span>
+    </button>
+    <button class="nav-item" onclick="showView('artists',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M3 21v-1a9 9 0 0118 0v1"/></svg>
+      Künstler
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="user-chip">
+      <div class="user-av">MA</div>
+      <div>
+        <div class="user-name">Max Admin</div>
+        <div class="user-role">Studio Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div id="view-dashboard" class="view active">
+    <div class="topbar">
+      <div><div class="topbar-title">Dashboard</div><div class="topbar-sub">Montag, 19. Mai 2026</div></div>
+      <div class="topbar-right">
+        <button class="btn" onclick="openApptModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Termin buchen
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-label">Umsatz Mai</div>
+          <div class="kpi-value" style="color:var(--orange)">€ 8.340</div>
+          <div class="kpi-delta delta-up">↑ 12% ggü. Vormonat</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Termine diese Woche</div>
+          <div class="kpi-value">24</div>
+          <div class="kpi-delta delta-up">↑ 3 mehr als letzte Woche</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Neue Kunden (Monat)</div>
+          <div class="kpi-value">7</div>
+          <div class="kpi-delta delta-down">↓ 2 weniger als letzten Monat</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Offene Rechnungen</div>
+          <div class="kpi-value" style="color:var(--red)">€ 1.250</div>
+          <div class="kpi-delta" style="color:var(--muted)">3 ausstehend</div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-title">Umsatz (letzte 8 Monate) <a onclick="showView('finances',document.querySelector('[onclick*=finances]'))">Details →</a></div>
+          <div class="chart-bars" id="dashChart"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">Künstler – Performance</div>
+          <div class="artist-perf" id="artistPerf"></div>
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <div class="dash-card">
+          <div class="dash-card-title">Heutige Termine <a onclick="showView('calendar',document.querySelector('[onclick*=calendar]'))">Alle anzeigen →</a></div>
+          <div class="appt-list" id="todayAppts"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CLIENTS ═══ -->
+  <div id="view-clients" class="view">
+    <div class="topbar">
+      <div><div class="topbar-title">Kunden</div><div class="topbar-sub">48 Kunden gesamt</div></div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openClientModal(null)">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Neuer Kunde
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="search-bar">
+        <input class="search-input" placeholder="🔍  Kunden suchen…" id="clientSearch" oninput="filterClients()">
+        <button class="filter-btn active" onclick="setFilter('all',this)" id="fAll">Alle</button>
+        <button class="filter-btn" onclick="setFilter('active',this)" id="fActive">Aktiv</button>
+        <button class="filter-btn" onclick="setFilter('vip',this)" id="fVip">VIP</button>
+        <button class="filter-btn" onclick="setFilter('new',this)" id="fNew">Neu</button>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+        <table class="clients-table">
+          <thead><tr>
+            <th>Kunde</th><th>Telefon</th><th>Letzter Besuch</th><th>Termine</th><th>Gesamt ausgegeben</th><th>Status</th><th></th>
+          </tr></thead>
+          <tbody id="clientsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CALENDAR ═══ -->
+  <div id="view-calendar" class="view">
+    <div class="topbar">
+      <div><div class="topbar-title">Kalender</div><div id="calTopbarSub" class="topbar-sub"></div></div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openApptModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Termin buchen
+        </button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="cal-controls">
+        <div class="cal-nav">
+          <button onclick="calNav(-1)">‹</button>
+          <button onclick="calNav(1)">›</button>
+        </div>
+        <div class="cal-date-label" id="calDateLabel"></div>
+        <button class="btn" style="font-size:.72rem" onclick="calGoToday()">Heute</button>
+        <div class="view-tabs">
+          <button class="view-tab" onclick="setCalView('day',this)">Tag</button>
+          <button class="view-tab active" onclick="setCalView('week',this)">Woche</button>
+          <button class="view-tab" onclick="setCalView('month',this)">Monat</button>
+        </div>
+      </div>
+      <div id="calBody"></div>
+    </div>
+  </div>
+
+  <!-- ═══ FINANCES ═══ -->
+  <div id="view-finances" class="view">
+    <div class="topbar">
+      <div><div class="topbar-title">Finanzen</div><div class="topbar-sub">Mai 2026</div></div>
+      <div class="topbar-right">
+        <button class="btn">Export CSV</button>
+        <button class="btn btn-primary" onclick="openApptModal()">+ Einnahme</button>
+      </div>
+    </div>
+    <div class="content">
+      <div class="fin-kpi">
+        <div class="kpi"><div class="kpi-label">Einnahmen Mai</div><div class="kpi-value" style="color:var(--green)">€ 8.340</div><div class="kpi-delta delta-up">↑ 12%</div></div>
+        <div class="kpi"><div class="kpi-label">Ausgaben Mai</div><div class="kpi-value" style="color:var(--red)">€ 2.140</div><div class="kpi-delta delta-down">↑ 5%</div></div>
+        <div class="kpi"><div class="kpi-label">Gewinn Mai</div><div class="kpi-value" style="color:var(--orange)">€ 6.200</div><div class="kpi-delta delta-up">↑ 15%</div></div>
+        <div class="kpi"><div class="kpi-label">Ø pro Termin</div><div class="kpi-value">€ 347</div><div class="kpi-delta" style="color:var(--muted)">24 Termine</div></div>
+      </div>
+      <div class="fin-row">
+        <div class="fin-card">
+          <div class="fin-card-title">Offene Rechnungen <span class="tag tag-red">3 offen</span></div>
+          <table class="invoices-table">
+            <thead><tr><th>Kunde</th><th>Datum</th><th>Betrag</th><th>Fällig</th><th>Status</th><th></th></tr></thead>
+            <tbody id="invoicesBody"></tbody>
+          </table>
+        </div>
+        <div class="fin-card">
+          <div class="fin-card-title">Ausgaben nach Kategorie</div>
+          <div id="expenseList"></div>
+        </div>
+      </div>
+      <div class="fin-row">
+        <div class="fin-card">
+          <div class="fin-card-title">Monatsumsatz nach Künstler</div>
+          <div id="artistRevChart"></div>
+        </div>
+        <div class="fin-card">
+          <div class="fin-card-title">Umsatz-Aufteilung</div>
+          <div class="pie-wrap" id="pieWrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ARTISTS ═══ -->
+  <div id="view-artists" class="view">
+    <div class="topbar">
+      <div><div class="topbar-title">Künstler</div><div class="topbar-sub">5 aktive Künstler</div></div>
+      <div class="topbar-right"><button class="btn btn-primary">+ Künstler</button></div>
+    </div>
+    <div class="content">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem" id="artistCards"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- CLIENT MODAL -->
+<div class="modal-overlay" id="clientModal" onclick="closeModal('clientModal',event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-av" id="cModalAv"></div>
+      <div><div class="modal-name" id="cModalName"></div><div class="modal-meta" id="cModalMeta"></div></div>
+      <button class="modal-close" onclick="closeModalDirect('clientModal')">×</button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" onclick="switchModalTab(0,this)">Profil</div>
+      <div class="modal-tab" onclick="switchModalTab(1,this)">Designs</div>
+      <div class="modal-tab" onclick="switchModalTab(2,this)">Termine</div>
+      <div class="modal-tab" onclick="switchModalTab(3,this)">Notizen</div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tab-content active" id="mtab0">
+        <div class="info-grid" id="cModalInfoGrid"></div>
+        <div class="section-title-sm">Besuchshistorie</div>
+        <div class="history-list" id="cModalHistory"></div>
+      </div>
+      <div class="modal-tab-content" id="mtab1">
+        <div class="section-title-sm">Design-Ablage</div>
+        <div class="design-gallery" id="cModalDesigns"></div>
+      </div>
+      <div class="modal-tab-content" id="mtab2">
+        <div class="section-title-sm">Alle Termine</div>
+        <div class="history-list" id="cModalAppts"></div>
+      </div>
+      <div class="modal-tab-content" id="mtab3">
+        <div class="section-title-sm">Notizen</div>
+        <textarea class="notes-area" id="cModalNotes" placeholder="Interne Notizen zum Kunden…" rows="6"></textarea>
+        <div style="margin-top:.7rem;display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="saveNotes()">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD APPOINTMENT MODAL -->
+<div class="modal-overlay" id="apptModal" onclick="closeModal('apptModal',event)">
+  <div class="appt-modal">
+    <div class="modal-title">Termin buchen <button class="modal-close" onclick="closeModalDirect('apptModal')">×</button></div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Datum</label><input class="form-input" type="date" id="apptDate"></div>
+      <div class="form-group"><label>Uhrzeit</label><input class="form-input" type="time" id="apptTime" value="10:00"></div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Künstler</label>
+        <select class="form-input" id="apptArtist">
+          <option>Aiko Tanaka</option><option>Marcus Reid</option><option>Liam Holt</option><option>Jade Moreau</option><option>Sofia Vega</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Service</label>
+        <select class="form-input" id="apptService">
+          <option>Custom Tattoo</option><option>Black &amp; Gray</option><option>Fine Line</option><option>Cover-Up</option><option>Piercing</option><option>Laser Removal</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Kunde</label>
+      <select class="form-input" id="apptClient"></select>
+    </div>
+    <div class="form-row-2">
+      <div class="form-group"><label>Dauer (Min)</label><input class="form-input" type="number" value="120" id="apptDur"></div>
+      <div class="form-group"><label>Preis (€)</label><input class="form-input" type="number" value="350" id="apptPrice"></div>
+    </div>
+    <div class="form-group"><label>Notiz</label><input class="form-input" placeholder="z.B. Unterarm, Rosen-Motiv…" id="apptNote"></div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeModalDirect('apptModal')">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveAppt()">Termin speichern</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const ARTISTS = [
+  {id:1,name:'Aiko Tanaka',role:'Tattoo Artist',spec:'Fine Line, Japanese',color:'#e84545',initials:'AT',revenue:3200,appts:9},
+  {id:2,name:'Marcus Reid',role:'Tattoo Artist',spec:'Black & Gray, Realism',color:'#4d9fff',initials:'MR',revenue:2800,appts:8},
+  {id:3,name:'Liam Holt',role:'Tattoo Artist',spec:'Custom, Neo-Trad',color:'#2dd36f',initials:'LH',revenue:2100,appts:7},
+  {id:4,name:'Jade Moreau',role:'Tattoo Artist',spec:'Watercolor, Geometric',color:'#f5c542',initials:'JM',revenue:1900,appts:6},
+  {id:5,name:'Sofia Vega',role:'Piercing Artist',spec:'Body Piercing',color:'#a855f7',initials:'SV',revenue:840,appts:5},
+];
+const CLIENTS = [
+  {id:1,name:'Jenny Wilson',email:'jenny@mail.de',phone:'+49 151 1234567',city:'München',dob:'1992-04-15',lastVisit:'2026-05-10',visits:6,total:1840,status:'vip',artist:'Aiko Tanaka',notes:'Mag florale Motive. Sehr pünktlich.',designs:['Rosen-Sleeve (Entwurf)','Schmetterling (final)','Ankh-Symbol'],history:[{date:'10.05.2026',desc:'Fine Line Rosen-Sleeve',amount:680},{date:'12.01.2026',desc:'Schmetterling linke Schulter',amount:320},{date:'03.09.2025',desc:'Ersttermin – Beratung',amount:0}]},
+  {id:2,name:'Jason Miller',email:'jason@webmail.de',phone:'+49 172 9876543',city:'Berlin',dob:'1988-11-02',lastVisit:'2026-05-14',visits:3,total:980,status:'active',artist:'Marcus Reid',notes:'Bevorzugt dunkle Motive.',designs:['Drachen-Rücken (Skizze)'],history:[{date:'14.05.2026',desc:'Black & Gray Drache (Session 2)',amount:480},{date:'20.02.2026',desc:'Drachen-Skizze Beratung',amount:120}]},
+  {id:3,name:'Sofia Ramirez',email:'sofia.r@email.de',phone:'+49 160 5554433',city:'Hamburg',dob:'1995-07-28',lastVisit:'2026-04-22',visits:2,total:540,status:'new',artist:'Jade Moreau',notes:'',designs:['Geometric Mandala'],history:[{date:'22.04.2026',desc:'Geometric Mandala Unterarm',amount:380}]},
+  {id:4,name:'Emily Carter',email:'emily.c@mail.de',phone:'+49 155 2223344',city:'Köln',dob:'1990-03-12',lastVisit:'2026-05-18',visits:8,total:3200,status:'vip',artist:'Aiko Tanaka',notes:'Stammkundin seit 2022. Immer Trinkgeld.',designs:['Sleeve Entwurf V3','Fuß-Tattoo','Nacken'],history:[{date:'18.05.2026',desc:'Sleeve Fortführung',amount:640},{date:'10.03.2026',desc:'Fuß-Tattoo fine line',amount:220}]},
+  {id:5,name:'Noah Schmidt',email:'noah.s@mail.de',phone:'+49 176 8881122',city:'Frankfurt',dob:'1997-09-05',lastVisit:'2026-03-08',visits:1,total:180,status:'new',artist:'Liam Holt',notes:'Ersttermin Beratung.',designs:[],history:[{date:'08.03.2026',desc:'Erstberatung Custom Motiv',amount:0}]},
+  {id:6,name:'Olivia Bennett',email:'olivia@mail.de',phone:'+49 157 3334455',city:'Stuttgart',dob:'1993-01-19',lastVisit:'2026-05-16',visits:4,total:1120,status:'active',artist:'Marcus Reid',notes:'Mag Realism-Portraits.',designs:['Portrait-Skizze','Arm-Wrap'],history:[{date:'16.05.2026',desc:'Portrait Session 1',amount:480},{date:'02.04.2026',desc:'Cover-Up Oberarm',amount:320}]},
+];
+const APPOINTMENTS = [
+  {id:1,client:'Jenny Wilson',artist:'Aiko Tanaka',artistId:1,service:'Fine Line',date:'2026-05-19',time:'09:00',dur:120,price:680,status:'confirmed'},
+  {id:2,client:'Jason Miller',artist:'Marcus Reid',artistId:2,service:'Black & Gray',date:'2026-05-19',time:'11:00',dur:180,price:480,status:'confirmed'},
+  {id:3,client:'Emily Carter',artist:'Aiko Tanaka',artistId:1,service:'Fine Line',date:'2026-05-19',time:'14:00',dur:150,price:640,status:'confirmed'},
+  {id:4,client:'Olivia Bennett',artist:'Marcus Reid',artistId:2,service:'Realism',date:'2026-05-19',time:'15:00',dur:120,price:480,status:'pending'},
+  {id:5,client:'Sofia Ramirez',artist:'Jade Moreau',artistId:4,service:'Geometric',date:'2026-05-20',time:'10:00',dur:120,price:380,status:'confirmed'},
+  {id:6,client:'Noah Schmidt',artist:'Liam Holt',artistId:3,service:'Custom',date:'2026-05-20',time:'13:00',dur:90,price:320,status:'confirmed'},
+  {id:7,client:'Jenny Wilson',artist:'Aiko Tanaka',artistId:1,service:'Fine Line',date:'2026-05-21',time:'11:00',dur:180,price:680,status:'confirmed'},
+  {id:8,client:'Emily Carter',artist:'Aiko Tanaka',artistId:1,service:'Sleeve',date:'2026-05-22',time:'10:00',dur:240,price:640,status:'confirmed'},
+  {id:9,client:'Jason Miller',artist:'Marcus Reid',artistId:2,service:'Black & Gray',date:'2026-05-22',time:'14:00',dur:120,price:480,status:'pending'},
+  {id:10,client:'Olivia Bennett',artist:'Marcus Reid',artistId:2,service:'Portrait',date:'2026-05-23',time:'09:00',dur:150,price:480,status:'confirmed'},
+  {id:11,client:'Sofia Ramirez',artist:'Sofia Vega',artistId:5,service:'Piercing',date:'2026-05-23',time:'11:00',dur:30,price:80,status:'confirmed'},
+  {id:12,client:'Emily Carter',artist:'Jade Moreau',artistId:4,service:'Watercolor',date:'2026-05-24',time:'13:00',dur:90,price:320,status:'confirmed'},
+];
+const INVOICES = [
+  {id:'INV-042',client:'Jason Miller',date:'2026-05-14',amount:480,due:'2026-05-21',status:'overdue'},
+  {id:'INV-043',client:'Noah Schmidt',date:'2026-05-18',amount:320,due:'2026-05-25',status:'open'},
+  {id:'INV-044',client:'Sofia Ramirez',date:'2026-05-19',amount:450,due:'2026-05-26',status:'open'},
+  {id:'INV-038',client:'Emily Carter',date:'2026-05-10',amount:640,due:'2026-05-17',status:'paid'},
+  {id:'INV-039',client:'Olivia Bennett',date:'2026-05-12',amount:480,due:'2026-05-19',status:'paid'},
+];
+const MONTHLY = [
+  {m:'Okt',v:5200},{m:'Nov',v:6100},{m:'Dez',v:7800},{m:'Jan',v:5900},
+  {m:'Feb',v:6400},{m:'Mär',v:7200},{m:'Apr',v:7450},{m:'Mai',v:8340},
+];
+const EXPENSES = [
+  {cat:'Miete',amount:1200,color:'#4d9fff',pct:56},
+  {cat:'Material',amount:480,color:'#f5c542',pct:22},
+  {cat:'Marketing',amount:280,color:'#2dd36f',pct:13},
+  {cat:'Sonstiges',amount:180,color:'#a855f7',pct:8},
+];
+let calView='week', calOffset=0, currentFilter='all';
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function showView(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='calendar') renderCalendar();
+  if(id==='finances') renderFinances();
+  if(id==='clients') renderClients();
+  if(id==='artists') renderArtistCards();
+  if(id==='dashboard') renderDashboard();
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════
+function renderDashboard(){
+  // Chart bars
+  const max=Math.max(...MONTHLY.map(m=>m.v));
+  document.getElementById('dashChart').innerHTML=MONTHLY.map(m=>`
+    <div class="chart-bar-wrap">
+      <div class="bar-val">€${(m.v/1000).toFixed(1)}k</div>
+      <div class="bar" style="height:${Math.round(m.v/max*90)}px" title="${m.m}: €${m.v}"></div>
+      <div class="bar-label">${m.m}</div>
+    </div>`).join('');
+  // Artist perf
+  const maxR=Math.max(...ARTISTS.map(a=>a.revenue));
+  document.getElementById('artistPerf').innerHTML=ARTISTS.map(a=>`
+    <div class="perf-row">
+      <div class="perf-av" style="background:${a.color}">${a.initials}</div>
+      <div class="perf-name">${a.name.split(' ')[0]}</div>
+      <div class="perf-bar-wrap"><div class="perf-bar" style="width:${Math.round(a.revenue/maxR*100)}%"></div></div>
+      <div class="perf-val">€${a.revenue.toLocaleString()}</div>
+    </div>`).join('');
+  // Today appts
+  const today=APPOINTMENTS.filter(a=>a.date==='2026-05-19');
+  document.getElementById('todayAppts').innerHTML=today.map(a=>{
+    const art=ARTISTS.find(x=>x.id===a.artistId);
+    const sc=a.status==='confirmed'?'green':'yellow';
+    return `<div class="appt-row">
+      <div class="appt-time">${a.time} Uhr</div>
+      <div class="appt-dot" style="background:${art?art.color:'#888'}"></div>
+      <div style="flex:1"><div class="appt-name">${a.client}</div><div class="appt-artist">${a.artist} · ${a.service}</div></div>
+      <span class="tag tag-${sc}">${a.status==='confirmed'?'Bestätigt':'Ausstehend'}</span>
+      <div style="font-size:.78rem;font-weight:600;color:var(--green);min-width:60px;text-align:right">€${a.price}</div>
+    </div>`;}).join('');
+}
+
+// ═══════════════════════════════════════════════
+// CLIENTS
+// ═══════════════════════════════════════════════
+function renderClients(list){
+  const q=(document.getElementById('clientSearch')||{}).value||'';
+  let data=list||CLIENTS;
+  if(q) data=data.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.email.toLowerCase().includes(q.toLowerCase()));
+  if(currentFilter==='vip') data=data.filter(c=>c.status==='vip');
+  if(currentFilter==='active') data=data.filter(c=>c.status==='active');
+  if(currentFilter==='new') data=data.filter(c=>c.status==='new');
+  const colors=['#e84545','#4d9fff','#2dd36f','#f5c542','#a855f7','#ff6800'];
+  document.getElementById('clientsBody').innerHTML=data.map((c,i)=>{
+    const sc=c.status==='vip'?'orange':c.status==='new'?'blue':'green';
+    const slabel=c.status==='vip'?'VIP':c.status==='new'?'Neu':'Aktiv';
+    return `<tr class="client-row" onclick="openClientModal(${c.id})">
+      <td><div class="client-name-cell">
+        <div class="avatar" style="background:${colors[i%colors.length]}">${c.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div><div class="client-name">${c.name}</div><div class="client-email">${c.email}</div></div>
+      </div></td>
+      <td style="color:var(--muted);font-size:.76rem">${c.phone}</td>
+      <td style="color:var(--muted)">${c.lastVisit}</td>
+      <td>${c.visits}</td>
+      <td style="font-weight:600;color:var(--green)">€${c.total.toLocaleString()}</td>
+      <td><span class="tag tag-${sc}">${slabel}</span></td>
+      <td><button class="btn" style="font-size:.7rem;padding:.3rem .7rem" onclick="event.stopPropagation();openApptModal()">Termin</button></td>
+    </tr>`;}).join('');
+}
+function filterClients(){renderClients();}
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderClients();
+}
+
+// ═══════════════════════════════════════════════
+// CLIENT MODAL
+// ═══════════════════════════════════════════════
+function openClientModal(id){
+  if(!id){
+    document.getElementById('clientModal').classList.add('open');
+    return;
+  }
+  const c=CLIENTS.find(x=>x.id===id);
+  if(!c) return;
+  const colors=['#e84545','#4d9fff','#2dd36f','#f5c542','#a855f7','#ff6800'];
+  const col=colors[id%colors.length];
+  document.getElementById('cModalAv').style.background=col;
+  document.getElementById('cModalAv').textContent=c.name.split(' ').map(x=>x[0]).join('');
+  document.getElementById('cModalName').textContent=c.name;
+  const sc=c.status==='vip'?'orange':c.status==='new'?'blue':'green';
+  const sl=c.status==='vip'?'VIP':c.status==='new'?'Neu':'Aktiv';
+  document.getElementById('cModalMeta').innerHTML=`${c.email} · <span class="tag tag-${sc}" style="font-size:.6rem">${sl}</span>`;
+  document.getElementById('cModalInfoGrid').innerHTML=[
+    ['Telefon',c.phone],['Stadt',c.city],['Geburtsdatum',c.dob],['Stammkünstler',c.artist],
+    ['Besuche',c.visits+' Termine'],['Gesamt',`€${c.total.toLocaleString()}`]
+  ].map(([l,v])=>`<div class="info-field"><div class="info-field-label">${l}</div><div class="info-field-val">${v}</div></div>`).join('');
+  document.getElementById('cModalHistory').innerHTML=c.history.map(h=>`
+    <div class="history-item">
+      <div class="history-dot" style="background:${col}"></div>
+      <div class="history-desc">${h.desc}</div>
+      <div class="history-date">${h.date}</div>
+      ${h.amount>0?`<div class="history-amount">€${h.amount}</div>`:''}
+    </div>`).join('');
+  const designs=c.designs||[];
+  const bgDesigns=['linear-gradient(135deg,#1e1208,#2e1800)','linear-gradient(135deg,#0a0a14,#14142a)','linear-gradient(135deg,#081414,#102020)'];
+  document.getElementById('cModalDesigns').innerHTML=
+    designs.map((d,i)=>`<div class="design-thumb" title="${d}">
+      <div class="design-thumb-bg" style="background:${bgDesigns[i%3]}">
+        <span style="font-size:.65rem;color:rgba(255,255,255,.4);text-align:center;padding:.3rem">${d}</span>
+      </div></div>`).join('')+
+    `<div class="design-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Design hinzufügen</span></div>`;
+  const appts=APPOINTMENTS.filter(a=>a.client===c.name);
+  document.getElementById('cModalAppts').innerHTML=appts.map(a=>`
+    <div class="history-item">
+      <div class="history-dot" style="background:${col}"></div>
+      <div class="history-desc">${a.service} · ${a.artist}<br><span style="font-size:.68rem;color:var(--muted)">${a.date} · ${a.time}</span></div>
+      <div class="history-amount">€${a.price}</div>
+    </div>`).join('')||'<p style="font-size:.8rem;color:var(--muted);padding:.5rem 0">Keine Termine.</p>';
+  document.getElementById('cModalNotes').value=c.notes||'';
+  // Reset tabs
+  document.querySelectorAll('.modal-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.modal-tab-content').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.getElementById('clientModal').classList.add('open');
+}
+function switchModalTab(idx,btn){
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.modal-tab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mtab'+idx).classList.add('active');
+}
+function saveNotes(){
+  const note=document.getElementById('cModalNotes').value;
+  alert('Notiz gespeichert!');
+}
+function closeModal(id,e){if(e.target===e.currentTarget) document.getElementById(id).classList.remove('open');}
+function closeModalDirect(id){document.getElementById(id).classList.remove('open');}
+function openClientModal(id){
+  if(!id){document.getElementById('clientModal').classList.add('open');return;}
+  const c=CLIENTS.find(x=>x.id===id); if(!c) return;
+  const colors=['#e84545','#4d9fff','#2dd36f','#f5c542','#a855f7','#ff6800'];
+  const col=colors[(id-1)%colors.length];
+  document.getElementById('cModalAv').style.background=col;
+  document.getElementById('cModalAv').textContent=c.name.split(' ').map(x=>x[0]).join('');
+  document.getElementById('cModalName').textContent=c.name;
+  const sc=c.status==='vip'?'orange':c.status==='new'?'blue':'green';
+  const sl=c.status==='vip'?'VIP':c.status==='new'?'Neu':'Aktiv';
+  document.getElementById('cModalMeta').innerHTML=`${c.email} &nbsp;·&nbsp; <span class="tag tag-${sc}" style="font-size:.6rem">${sl}</span>`;
+  document.getElementById('cModalInfoGrid').innerHTML=[['Telefon',c.phone],['Stadt',c.city],['Geburtsdatum',c.dob],['Stammkünstler',c.artist],['Besuche',c.visits+' Termine'],['Gesamt ausgegeben','€'+c.total.toLocaleString()]].map(([l,v])=>`<div class="info-field"><div class="info-field-label">${l}</div><div class="info-field-val">${v}</div></div>`).join('');
+  document.getElementById('cModalHistory').innerHTML=c.history.map(h=>`<div class="history-item"><div class="history-dot" style="background:${col}"></div><div class="history-desc">${h.desc}</div><div class="history-date">${h.date}</div>${h.amount>0?`<div class="history-amount">€${h.amount}</div>`:''}</div>`).join('');
+  const designs=c.designs||[];
+  const bgD=['linear-gradient(135deg,#1e1208,#2e1800)','linear-gradient(135deg,#0a0a14,#14142a)','linear-gradient(135deg,#081414,#102020)'];
+  document.getElementById('cModalDesigns').innerHTML=designs.map((d,i)=>`<div class="design-thumb"><div class="design-thumb-bg" style="background:${bgD[i%3]}"><span style="font-size:.63rem;color:rgba(255,255,255,.45);text-align:center;padding:.4rem;display:block">${d}</span></div></div>`).join('')+`<div class="design-add"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Design hinzufügen</span></div>`;
+  const appts=APPOINTMENTS.filter(a=>a.client===c.name);
+  document.getElementById('cModalAppts').innerHTML=appts.length?appts.map(a=>`<div class="history-item"><div class="history-dot" style="background:${col}"></div><div class="history-desc">${a.service} · ${a.artist}<br><span style="font-size:.66rem;color:var(--muted)">${a.date} · ${a.time} Uhr</span></div><div class="history-amount">€${a.price}</div></div>`).join(''):'<p style="font-size:.8rem;color:var(--muted);padding:.5rem 0">Keine Termine vorhanden.</p>';
+  document.getElementById('cModalNotes').value=c.notes||'';
+  document.querySelectorAll('.modal-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.querySelectorAll('.modal-tab-content').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.getElementById('clientModal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════
+const WEEK_DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+const WEEK_DAYS_FULL=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
+const MONTH_NAMES=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+const ARTIST_COLORS=['#e84545','#4d9fff','#2dd36f','#f5c542','#a855f7'];
+const ARTIST_CLS=['','blue','green','yellow',''];
+
+function getWeekStart(offset){
+  const d=new Date('2026-05-18');
+  d.setDate(d.getDate()+offset*7);
+  const day=d.getDay();
+  const diff=d.getDate()-(day===0?6:day-1);
+  return new Date(d.setDate(diff));
+}
+function fmtDate(d){return d.toISOString().split('T')[0];}
+function setCalView(v,btn){
+  calView=v;
+  document.querySelectorAll('.view-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCalendar();
+}
+function calNav(dir){calOffset+=dir;renderCalendar();}
+function calGoToday(){calOffset=0;renderCalendar();}
+
+function renderCalendar(){
+  const body=document.getElementById('calBody');
+  if(calView==='week') renderWeek(body);
+  else if(calView==='month') renderMonth(body);
+  else renderDay(body);
+}
+
+function renderWeek(body){
+  const ws=getWeekStart(calOffset);
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(ws);d.setDate(d.getDate()+i);days.push(d);}
+  document.getElementById('calDateLabel').textContent=`${days[0].getDate()}. – ${days[6].getDate()}. ${MONTH_NAMES[days[0].getMonth()]} ${days[0].getFullYear()}`;
+  document.getElementById('calTopbarSub').textContent='Wochenansicht · 5 Künstler';
+  const hours=[];for(let h=8;h<=21;h++) hours.push(h);
+  let html=`<div class="week-grid">
+  <div class="week-header" style="grid-template-columns:60px repeat(5,1fr)">
+    <div style="width:60px;padding:.75rem .5rem"></div>`;
+  ARTISTS.forEach(a=>`<div class="week-artist-header"><div class="week-artist-av" style="background:${a.color}">${a.initials}</div>${a.name.split(' ')[0]}</div>`).forEach(h=>html+=h);
+  html+=`</div><div class="week-body"><div class="week-times">`;
+  hours.forEach(h=>{html+=`<div class="week-time-slot">${h}:00</div>`;});
+  html+=`</div><div class="week-cols" style="grid-template-columns:repeat(5,1fr)">`;
+  ARTISTS.forEach((art,ai)=>{
+    html+=`<div class="week-col">`;
+    hours.forEach(()=>{html+=`<div class="week-slot"></div>`;});
+    const artAppts=APPOINTMENTS.filter(a=>a.artistId===art.id);
+    days.slice(0,5).forEach((day)=>{
+      const ds=fmtDate(day);
+      artAppts.filter(a=>a.date===ds).forEach(ap=>{
+        const [hh,mm]=ap.time.split(':').map(Number);
+        const top=(hh-8)*50+(mm/60*50);
+        const h=Math.max((ap.dur/60)*50,30);
+        const cls=ARTIST_CLS[ai]||'';
+        html+=`<div class="week-event ${cls}" style="top:${top}px;height:${h}px" title="${ap.client} · ${ap.service}">
+          <div class="week-event-name">${ap.client}</div>
+          <div class="week-event-time">${ap.time} · ${ap.service}</div></div>`;
+      });
+    });
+    html+=`</div>`;
+  });
+  html+=`</div></div></div>`;
+  body.innerHTML=html;
+}
+
+function renderMonth(body){
+  const base=new Date(2026,4+calOffset,1);
+  const month=base.getMonth(); const year=base.getFullYear();
+  document.getElementById('calDateLabel').textContent=`${MONTH_NAMES[month]} ${year}`;
+  document.getElementById('calTopbarSub').textContent='Monatsansicht';
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const startOffset=firstDay===0?6:firstDay-1;
+  let html=`<div class="month-grid"><div class="month-header-row">`;
+  WEEK_DAYS.forEach(d=>{html+=`<div class="month-day-name">${d}</div>`;});
+  html+=`</div><div class="month-body">`;
+  for(let i=0;i<startOffset;i++) html+=`<div class="month-cell other-month"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=(year===2026&&month===4&&d===19);
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayAppts=APPOINTMENTS.filter(a=>a.date===ds);
+    html+=`<div class="month-cell${isToday?' today':''}">
+      <div class="month-day-num">${d}</div>
+      ${dayAppts.slice(0,2).map((a,i)=>`<span class="month-event-dot${i===1?' blue':''}">${a.client.split(' ')[0]}</span>`).join('')}
+      ${dayAppts.length>2?`<span class="month-event-dot" style="background:rgba(255,255,255,.06);color:var(--muted)">+${dayAppts.length-2} mehr</span>`:''}
+    </div>`;
+  }
+  html+=`</div></div>`;
+  body.innerHTML=html;
+}
+
+function renderDay(body){
+  const base=new Date('2026-05-19');
+  base.setDate(base.getDate()+calOffset);
+  const ds=fmtDate(base);
+  const wd=WEEK_DAYS_FULL[base.getDay()===0?6:base.getDay()-1];
+  document.getElementById('calDateLabel').textContent=`${wd}, ${base.getDate()}. ${MONTH_NAMES[base.getMonth()]} ${base.getFullYear()}`;
+  document.getElementById('calTopbarSub').textContent='Tagesansicht';
+  const hours=[];for(let h=8;h<=21;h++) hours.push(h);
+  const dayAppts=APPOINTMENTS.filter(a=>a.date===ds);
+  let html=`<div class="day-grid"><div class="day-times">`;
+  hours.forEach(h=>{html+=`<div class="day-time-slot">${h}:00</div>`;});
+  html+=`</div><div class="day-content" style="position:relative;min-height:${hours.length*60}px">`;
+  hours.forEach(()=>{html+=`<div class="day-slot"></div>`;});
+  dayAppts.forEach(ap=>{
+    const [hh,mm]=ap.time.split(':').map(Number);
+    const top=(hh-8)*60+(mm/60*60);
+    const h=Math.max((ap.dur/60)*60,40);
+    const art=ARTISTS.find(x=>x.id===ap.artistId);
+    const cls=ARTIST_CLS[ap.artistId-1]||'';
+    html+=`<div class="day-event ${cls}" style="top:${top}px;height:${h}px">
+      <div class="day-event-name">${ap.client} · ${ap.service}</div>
+      <div class="day-event-detail">${ap.time} Uhr · ${ap.dur} Min · €${ap.price} · ${ap.artist}</div>
+    </div>`;
+  });
+  html+=`</div></div>`;
+  body.innerHTML=html;
+}
+
+// ═══════════════════════════════════════════════
+// FINANCES
+// ═══════════════════════════════════════════════
+function renderFinances(){
+  document.getElementById('invoicesBody').innerHTML=INVOICES.map(inv=>{
+    const sc=inv.status==='paid'?'green':inv.status==='overdue'?'red':'yellow';
+    const sl=inv.status==='paid'?'Bezahlt':inv.status==='overdue'?'Überfällig':'Offen';
+    return `<tr>
+      <td style="font-weight:500">${inv.id}</td>
+      <td>${inv.client}</td>
+      <td style="color:var(--muted)">${inv.date}</td>
+      <td style="font-weight:600">€${inv.amount}</td>
+      <td style="color:var(--muted)">${inv.due}</td>
+      <td><span class="tag tag-${sc}">${sl}</span></td>
+      <td>${inv.status!=='paid'?`<button class="btn" style="font-size:.65rem;padding:.25rem .6rem">Mahnen</button>`:''}</td>
+    </tr>`;}).join('');
+
+  document.getElementById('expenseList').innerHTML=EXPENSES.map(e=>`
+    <div class="expense-row">
+      <div class="expense-cat" style="background:${e.color}"></div>
+      <div class="expense-name">${e.cat}</div>
+      <div class="expense-bar-wrap"><div class="expense-bar-inner" style="width:${e.pct}%;background:${e.color};opacity:.6"></div></div>
+      <div class="expense-amount">€${e.amount}</div>
+    </div>`).join('');
+
+  const maxR=Math.max(...ARTISTS.map(a=>a.revenue));
+  document.getElementById('artistRevChart').innerHTML=`
+    <div style="display:flex;align-items:flex-end;gap:10px;height:110px;margin-top:.5rem">
+      ${ARTISTS.map(a=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px">
+        <span style="font-size:.62rem;color:var(--muted)">€${(a.revenue/1000).toFixed(1)}k</span>
+        <div style="width:100%;border-radius:6px 6px 0 0;background:${a.color};opacity:.7;height:${Math.round(a.revenue/maxR*80)}px"></div>
+        <span style="font-size:.6rem;color:var(--muted)">${a.initials}</span>
+      </div>`).join('')}
+    </div>`;
+
+  const total=ARTISTS.reduce((s,a)=>s+a.revenue,0);
+  const size=80, cx=45, cy=45, r=32;
+  let angle=-Math.PI/2;
+  const slices=ARTISTS.map(a=>{
+    const pct=a.revenue/total;
+    const sweep=pct*2*Math.PI;
+    const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+    angle+=sweep;
+    const x2=cx+r*Math.cos(angle), y2=cy+r*Math.sin(angle);
+    const large=sweep>Math.PI?1:0;
+    return `<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${a.color}" opacity=".8"/>`;
+  }).join('');
+  document.getElementById('pieWrap').innerHTML=`
+    <svg width="${size}" height="${size}" class="pie-svg" viewBox="0 0 ${size} ${size}">${slices}
+      <circle cx="${cx}" cy="${cy}" r="18" fill="var(--card)"/>
+    </svg>
+    <div class="pie-legend">
+      ${ARTISTS.map(a=>`<div class="pie-legend-item"><div class="pie-dot" style="background:${a.color}"></div><span>${a.name.split(' ')[0]}: €${a.revenue.toLocaleString()}</span></div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════
+// ARTISTS
+// ═══════════════════════════════════════════════
+function renderArtistCards(){
+  document.getElementById('artistCards').innerHTML=ARTISTS.map(a=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.4rem;transition:transform .2s,border-color .2s;cursor:pointer" onmouseover="this.style.borderColor='rgba(255,104,0,.25)';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem">
+        <div style="width:46px;height:46px;border-radius:50%;background:${a.color};display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:600;color:#fff">${a.initials}</div>
+        <div><div style="font-weight:600;font-size:.88rem">${a.name}</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px">${a.role}</div></div>
+      </div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;padding:.4rem .7rem;background:rgba(255,255,255,.04);border-radius:99px;display:inline-block">${a.spec}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <div style="background:var(--card2);border-radius:var(--r);padding:.7rem .9rem"><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Umsatz Mai</div><div style="font-size:.95rem;font-weight:600;color:var(--green)">€${a.revenue.toLocaleString()}</div></div>
+        <div style="background:var(--card2);border-radius:var(--r);padding:.7rem .9rem"><div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Termine</div><div style="font-size:.95rem;font-weight:600">${a.appts}</div></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:.9rem;justify-content:center;font-size:.72rem">Kalender anzeigen</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// APPOINTMENT MODAL
+// ═══════════════════════════════════════════════
+function openApptModal(){
+  const sel=document.getElementById('apptClient');
+  if(sel) sel.innerHTML=CLIENTS.map(c=>`<option>${c.name}</option>`).join('');
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('apptDate').value=today;
+  document.getElementById('apptModal').classList.add('open');
+}
+function saveAppt(){
+  const date=document.getElementById('apptDate').value;
+  const time=document.getElementById('apptTime').value;
+  const artist=document.getElementById('apptArtist').value;
+  const client=document.getElementById('apptClient').value;
+  const service=document.getElementById('apptService').value;
+  const price=document.getElementById('apptPrice').value;
+  const dur=document.getElementById('apptDur').value;
+  if(!date||!time){alert('Bitte Datum und Uhrzeit angeben.');return;}
+  APPOINTMENTS.push({id:APPOINTMENTS.length+1,client,artist,artistId:ARTISTS.findIndex(a=>a.name===artist)+1,service,date,time,dur:+dur,price:+price,status:'confirmed'});
+  closeModalDirect('apptModal');
+  if(document.getElementById('view-calendar').classList.contains('active')) renderCalendar();
+  if(document.getElementById('view-dashboard').classList.contains('active')) renderDashboard();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderDashboard();
+renderClients();
+</script>
+</body>
+</html>
